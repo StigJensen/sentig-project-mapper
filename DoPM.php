@@ -32,7 +32,7 @@ $outputFile = $rootDir . "/overview_$dateTime.txt"; // The output file for the r
 $currentScript = basename(__FILE__); // Get the name of this script
 
 // File types to include in the scan
-$allowedExtensions = ['php', 'html', 'htm', 'js', 'css', 'sql', 'json', 'xml', 'yml', 'yaml', 'py', 'sh', 'bash', 'txt', 'htaccess', 'bashrc', 'bash_profile', 'Makefile'];
+$allowedExtensions = ['php', 'html', 'htm', 'js', 'css', 'py', 'sh', 'bash', 'txt', 'htaccess', 'bashrc', 'bash_profile', 'Makefile'];
 
 // Open the output file for writing
 $fileHandle = fopen($outputFile, 'w');
