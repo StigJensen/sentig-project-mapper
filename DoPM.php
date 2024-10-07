@@ -6,7 +6,7 @@
  *          all PHP, HTML, JS, CSS, and other relevant files into a single overview file.
  * Website: sentig.com
  * Date: 07 October 2024
- * Version: 1.4
+ * Version: 1.5
  *
  * --- A PHP Poem ---
  *
@@ -32,7 +32,10 @@ $outputFile = $rootDir . "/overview_$dateTime.txt"; // The output file for the r
 $currentScript = basename(__FILE__); // Get the name of this script
 
 // File types to include in the scan
-$allowedExtensions = ['php', 'html', 'htm', 'js', 'css', 'py', 'sh', 'bash', 'txt', 'htaccess', 'bashrc', 'bash_profile', 'Makefile'];
+$allowedExtensions = ['php', 'html', 'htm', 'js', 'css', 'py', 'sh', 'bash', 'htaccess', 'bashrc', 'bash_profile', 'Makefile', 'Dockerfile', 'dockerignore'];
+
+// Maximum file size (1MB in bytes)
+$maxFileSize = 1024 * 1024; // 1MB
 
 // Open the output file for writing
 $fileHandle = fopen($outputFile, 'w');
@@ -41,9 +44,9 @@ if (!$fileHandle) {
     die("Could not open file for writing.");
 }
 
-// Function to scan directory and build map, only listing allowed file types
+// Function to scan directory and build map, only listing allowed file types and skipping large files
 function buildDirectoryMap($dir, $level = 0) {
-    global $fileHandle, $currentScript, $allowedExtensions;
+    global $fileHandle, $currentScript, $allowedExtensions, $maxFileSize;
     $files = scandir($dir);
 
     // Create an indent for the directory level
@@ -65,18 +68,19 @@ function buildDirectoryMap($dir, $level = 0) {
         } else {
             // Get the file extension and check if it’s in the allowed extensions
             $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-            if (in_array($extension, $allowedExtensions) || in_array($file, ['.htaccess', 'Makefile', 'Dockerfile'])) {
+            $fileSize = filesize($filePath); // Get the file size
+            if (($fileSize <= $maxFileSize) && (in_array($extension, $allowedExtensions) || in_array($file, ['.htaccess', 'Makefile', 'Dockerfile']))) {
                 // Add file to the directory map
-                $directoryMap .= $indent . '  - ' . $file . "\n";
+                $directoryMap .= $indent . '  - ' . $file . " (Size: " . round($fileSize / 1024, 2) . " KB)\n";
             }
         }
     }
     return $directoryMap;
 }
 
-// Function to scan directory and append file content
+// Function to scan directory and append file content, skipping large files
 function appendFileContents($dir) {
-    global $fileHandle, $currentScript, $allowedExtensions;
+    global $fileHandle, $currentScript, $allowedExtensions, $maxFileSize;
     $files = scandir($dir);
 
     foreach ($files as $file) {
@@ -90,9 +94,10 @@ function appendFileContents($dir) {
             // Recurse into subdirectory
             appendFileContents($filePath);
         } else {
-            // Get the file extension or handle special files like .htaccess and Dockerfile
+            // Get the file extension and size
             $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-            if (in_array($extension, $allowedExtensions) || in_array($file, ['.htaccess', 'Makefile', 'Dockerfile'])) {
+            $fileSize = filesize($filePath); // Get the file size
+            if (($fileSize <= $maxFileSize) && (in_array($extension, $allowedExtensions) || in_array($file, ['.htaccess', 'Makefile', 'Dockerfile']))) {
                 // Add subheading and file content to the overview.txt file
                 fwrite($fileHandle, "\n--- " . $filePath . " ---\n\n");
 
