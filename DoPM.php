@@ -6,7 +6,7 @@
  *          all PHP, HTML, JS, CSS, and other relevant files into a single overview file.
  * Website: sentig.com
  * Date: 07 October 2024
- * Version: 1.5
+ * Version: 1.6
  *
  * --- A PHP Poem ---
  *
@@ -44,7 +44,7 @@ if (!$fileHandle) {
     die("Could not open file for writing.");
 }
 
-// Function to scan directory and build map, only listing allowed file types and skipping large files
+// Function to scan directory and build map, only listing allowed file types and skipping large files and hidden files/directories
 function buildDirectoryMap($dir, $level = 0) {
     global $fileHandle, $currentScript, $allowedExtensions, $maxFileSize;
     $files = scandir($dir);
@@ -56,8 +56,8 @@ function buildDirectoryMap($dir, $level = 0) {
     $directoryMap = $indent . basename($dir) . "\n";
 
     foreach ($files as $file) {
-        if ($file === '.' || $file === '..' || $file === $currentScript) {
-            continue;
+        if ($file === '.' || $file === '..' || $file === $currentScript || $file[0] === '.') {
+            continue; // Skip current/parent directories, current script, and hidden files
         }
 
         $filePath = $dir . '/' . $file;
@@ -78,14 +78,14 @@ function buildDirectoryMap($dir, $level = 0) {
     return $directoryMap;
 }
 
-// Function to scan directory and append file content, skipping large files
+// Function to scan directory and append file content, skipping large files and hidden files/directories
 function appendFileContents($dir) {
     global $fileHandle, $currentScript, $allowedExtensions, $maxFileSize;
     $files = scandir($dir);
 
     foreach ($files as $file) {
-        if ($file === '.' || $file === '..' || $file === $currentScript) {
-            continue;
+        if ($file === '.' || $file === '..' || $file === $currentScript || $file[0] === '.') {
+            continue; // Skip current/parent directories, current script, and hidden files
         }
 
         $filePath = $dir . '/' . $file;
